@@ -28,14 +28,9 @@ class DataHandler():
             self.URL, delimiter=","
         )
     
-    def parse_data_multi(self):
-        return np.genfromtxt(
-            self.URL, delimiter=",", dtype="|U19"
-        )
-
     def parse_data(self):
         return np.loadtxt(
-            self.URL, delimiter=",", skiprows=1, usecols=[1, 2, 3]
+            self.URL, delimiter=",", skiprows=2
         )
 
     def shuffle_data(self, data, seed=0):
@@ -63,22 +58,5 @@ class DataHandler():
         validation = data[validation_index:]
         return train, validation
 
-    def getXYFolded(self, data):
-        result = list()
-        data = np.array(data)
-        for X in data:
-            result.append(self.getXY(X))
-        return result
-
     def getXY(self, data, xInd, yInd):
         return data[:, :xInd], data[:, yInd:]
-            
-    def filter(self, tX, tY, classifier):
-        tY = np.char.decode(np.array(tY).astype(np.bytes_), 'UTF-8')
-        Y = np.array_like(tY)
-        print(Y)
-        # print(tY)
-        m, n = tX.shape
-        # for i in range(m):
-        #     if tY[i, 0] == classifier:
-        #         Y[i, 0] == 
