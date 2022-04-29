@@ -7,7 +7,7 @@ class DataHandler():
     def __init__(self, URL):
         self.URL = abspath(URL)
 
-    def zscore_data(self, tX, X):
+    def zscore_data(self, tX):
         means = np.zeros((1, tX.shape[1]))
         stds = np.zeros((1, tX.shape[1]))
         for i in range(tX.shape[1]):
@@ -16,7 +16,6 @@ class DataHandler():
             means[:, i] = mean
             std = np.std(data_, ddof=1)
             stds[:, i] = std
-            # X[:,1] = (X[:,1]-mean)/std
         return means, stds
 
     def apply_zscore(self, means, stds, X):
@@ -45,16 +44,16 @@ class DataHandler():
         np.random.shuffle(data)
         return data
     
-    def dynamic_split(self, data):
-        X, Y = self.getXY(data, -1, -1)
+    def dynamic_split(self, X, Y, mean, std):
         m = X.shape[0]
-        mean, std = self.zscore_data(X, X)
         X = self.apply_zscore(mean, std, X)
         split_X = np.array([X[Y[:,0] == y] for y in np.unique(Y)], dtype=object)
+        split_means = np.array([X[Y[:,0] == y].mean(axis=0) for y in np.unique(Y)], dtype=object)
+        split_vars = np.array([X[Y[:,0] == y].var(axis=0) for y in np.unique(Y)], dtype=object)
         priors = []
         for j in range(split_X.shape[0]):
             priors.append(len(split_X[j])/m)
-        return split_X, np.array(Y), np.array(priors)
+        return split_X, np.array(priors), split_means, split_vars
 
     def split_data(self, data):
         # Create Arrays for Training vs Validation
