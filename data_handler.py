@@ -7,11 +7,11 @@ class DataHandler():
     def __init__(self, URL):
         self.URL = abspath(URL)
 
-    def zscore_data(self, tX):
-        means = np.zeros((1, tX.shape[1]))
-        stds = np.zeros((1, tX.shape[1]))
-        for i in range(tX.shape[1]):
-            data_ = tX[:, i]
+    def zscore_data(self, X):
+        means = np.zeros((1, X.shape[1]))
+        stds = np.zeros((1, X.shape[1]))
+        for i in range(X.shape[1]):
+            data_ = X[:, i]
             mean = np.mean(data_)
             means[:, i] = mean
             std = np.std(data_, ddof=1)
@@ -19,23 +19,16 @@ class DataHandler():
         return means, stds
 
     def apply_zscore(self, means, stds, X):
-        for i in range(X.shape[1]):
-            X[:,i] = np.subtract(X[:,i], means[:, i])/stds[:, i]
-        return X
-
+        return (X - means)/stds
+    
     def parse_data_no_header(self):
         return np.genfromtxt(
             self.URL, delimiter=","
         )
     
-    def parse_data_multi(self):
-        return np.genfromtxt(
-            self.URL, delimiter=",", dtype="|U19"
-        )
-
     def parse_data(self):
         return np.loadtxt(
-            self.URL, delimiter=",", skiprows=1, usecols=[1, 2, 3]
+            self.URL, delimiter=",", skiprows=2
         )
 
     def shuffle_data(self, data, seed=0):
@@ -46,7 +39,7 @@ class DataHandler():
     
     def dynamic_split(self, X, Y, mean, std):
         m = X.shape[0]
-        X = self.apply_zscore(mean, std, X)
+        # X = self.apply_zscore(mean, std, X)
         split_X = np.array([X[Y[:,0] == y] for y in np.unique(Y)], dtype=object)
         split_means = np.array([X[Y[:,0] == y].mean(axis=0) for y in np.unique(Y)], dtype=object)
         split_vars = np.array([X[Y[:,0] == y].var(axis=0) for y in np.unique(Y)], dtype=object)
@@ -63,22 +56,5 @@ class DataHandler():
         validation = data[validation_index:]
         return train, validation
 
-    def getXYFolded(self, data):
-        result = list()
-        data = np.array(data)
-        for X in data:
-            result.append(self.getXY(X))
-        return result
-
     def getXY(self, data, xInd, yInd):
         return data[:, :xInd], data[:, yInd:]
-            
-    def filter(self, tX, tY, classifier):
-        tY = np.char.decode(np.array(tY).astype(np.bytes_), 'UTF-8')
-        Y = np.array_like(tY)
-        print(Y)
-        # print(tY)
-        m, n = tX.shape
-        # for i in range(m):
-        #     if tY[i, 0] == classifier:
-        #         Y[i, 0] == 
